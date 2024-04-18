@@ -1,17 +1,18 @@
-from langchain.llms import GooglePalm
-from langchain.utilities import SQLDatabase
+from langchain_community.llms import GooglePalm
+from langchain.community.utilities import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.prompts import SemanticSimilarityExampleSelector
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.prompts import FewShotPromptTemplate
 from langchain.chains.sql_database.prompt import PROMPT_SUFFIX, _mysql_prompt
 from langchain.prompts.prompt import PromptTemplate
+from langchain.prompts import FewShotPromptTemplate
 
 from few_shots import few_shots
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()  # take environment variables from .env (especially openai api key)
 
 
@@ -37,19 +38,19 @@ def get_few_shot_db_chain():
     Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in backticks (`) to denote them as delimited identifiers.
     Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
     Pay attention to use CURDATE() function to get the current date, if the question involves "today".
-    
+
     Use the following format:
-    
+
     Question: Question here
     SQLQuery: Query to run with no pre-amble
     SQLResult: Result of the SQLQuery
     Answer: Final answer here
-    
+
     No pre-amble.
     """
 
     example_prompt = PromptTemplate(
-        input_variables=["Question", "SQLQuery", "SQLResult","Answer",],
+        input_variables=["Question", "SQLQuery", "SQLResult", "Answer", ],
         template="\nQuestion: {Question}\nSQLQuery: {SQLQuery}\nSQLResult: {SQLResult}\nAnswer: {Answer}",
     )
 
@@ -58,8 +59,7 @@ def get_few_shot_db_chain():
         example_prompt=example_prompt,
         prefix=mysql_prompt,
         suffix=PROMPT_SUFFIX,
-        input_variables=["input", "table_info", "top_k"], #These variables are used in the prefix and suffix
+        input_variables=["input", "table_info", "top_k"],  # These variables are used in the prefix and suffix
     )
     chain = SQLDatabaseChain.from_llm(llm, db, verbose=True, prompt=few_shot_prompt)
     return chain
-
