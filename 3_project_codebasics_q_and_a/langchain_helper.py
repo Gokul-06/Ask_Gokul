@@ -1,7 +1,7 @@
-from langchain.vectorstores import FAISS
-from langchain.llms import GooglePalm
+from langchain_community.vectorstores import FAISS
+from langchain_community.llms import GooglePalm
 from langchain.document_loaders.csv_loader import CSVLoader
-from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import os
@@ -30,7 +30,7 @@ def create_vector_db():
 
 def get_qa_chain():
     # Load the vector database from the local folder
-    vectordb = FAISS.load_local(vectordb_file_path, instructor_embeddings)
+    vectordb = FAISS.load_local(vectordb_file_path, instructor_embeddings,allow_dangerous_deserialization=True)
 
     # Create a retriever for querying the vector database
     retriever = vectordb.as_retriever(score_threshold=0.7)
